@@ -16,11 +16,6 @@
 package io.github.swagger2markup;
 
 import io.github.swagger2markup.builder.Swagger2MarkupConfigBuilder;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +25,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 import static io.github.swagger2markup.Swagger2MarkupProperties.*;
 
@@ -63,20 +64,20 @@ public class Swagger2MarkupMojo extends AbstractMojo {
         try{
             Swagger2MarkupConfig swagger2MarkupConfig = new Swagger2MarkupConfigBuilder(config).build();
             if(input.startsWith("http")){
-                Swagger2MarkupConverter.from(URI.create(input))
-                        .withConfig(swagger2MarkupConfig).build().toPath(output.toPath());
+                Swagger2MarkupConverter.from(URI.create(input).toURL())
+                        .withConfig(swagger2MarkupConfig).build().toFolder(output.toPath());
             }else {
                 Path inputPath = Paths.get(input);
                 if (Files.isDirectory(inputPath)) {
                     try {
                         Files.list(inputPath).forEach(path -> Swagger2MarkupConverter.from(path)
-                                .withConfig(swagger2MarkupConfig).build().toPath(output.toPath()));
+                                .withConfig(swagger2MarkupConfig).build().toFolder(output.toPath()));
                     } catch (IOException e) {
                         throw new MojoFailureException(String.format("Failed to list files in directory %s", inputPath));
                     }
                 } else {
                     Swagger2MarkupConverter.from(inputPath)
-                            .withConfig(swagger2MarkupConfig).build().toPath(output.toPath());
+                            .withConfig(swagger2MarkupConfig).build().toFolder(output.toPath());
                 }
             }
         }catch(Exception e){

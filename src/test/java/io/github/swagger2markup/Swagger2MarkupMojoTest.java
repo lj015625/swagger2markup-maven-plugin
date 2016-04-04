@@ -1,6 +1,8 @@
 package io.github.swagger2markup;
 
+import io.github.swagger2markup.Swagger2MarkupProperties;
 import io.github.swagger2markup.markup.builder.MarkupLanguage;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.MojoFailureException;
