@@ -20,6 +20,7 @@ import io.github.swagger2markup.builder.Swagger2MarkupConfigBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,6 +48,9 @@ public class Swagger2MarkupMojo extends AbstractMojo {
     @Parameter(property = PROPERTIES_PREFIX + ".output", defaultValue = "${project.build.directory}/asciidoc")
     protected File output;
 
+    @Parameter(property = PROPERTIES_PREFIX + ".jira", defaultValue = "https://jira.atlassian.com/rest/api/2/search?")
+    protected String jira;
+    
     @Parameter
     protected Map<String, String> config = new HashMap<>();
 
@@ -63,21 +67,22 @@ public class Swagger2MarkupMojo extends AbstractMojo {
 
         try{
             Swagger2MarkupConfig swagger2MarkupConfig = new Swagger2MarkupConfigBuilder(config).build();
+            URL jiraJQLURL = URI.create(jira).toURL();
             if(input.startsWith("http")){
                 Swagger2MarkupConverter.from(URI.create(input).toURL())
-                        .withConfig(swagger2MarkupConfig).build().toFolder(output.toPath());
+                        .withConfig(swagger2MarkupConfig).withJiraJQL(jiraJQLURL).build().toFolder(output.toPath());
             }else {
                 Path inputPath = Paths.get(input);
                 if (Files.isDirectory(inputPath)) {
                     try {
                         Files.list(inputPath).forEach(path -> Swagger2MarkupConverter.from(path)
-                                .withConfig(swagger2MarkupConfig).build().toFolder(output.toPath()));
+                                .withConfig(swagger2MarkupConfig).withJiraJQL(jiraJQLURL).build().toFolder(output.toPath()));
                     } catch (IOException e) {
                         throw new MojoFailureException(String.format("Failed to list files in directory %s", inputPath));
                     }
                 } else {
                     Swagger2MarkupConverter.from(inputPath)
-                            .withConfig(swagger2MarkupConfig).build().toFolder(output.toPath());
+                            .withConfig(swagger2MarkupConfig).withJiraJQL(jiraJQLURL).build().toFolder(output.toPath());
                 }
             }
         }catch(Exception e){
